@@ -185,8 +185,7 @@
 ```
 プロジェクトフォルダ/
 ├── main.cpp             # サンプルのメインファイル
-├── include/
-│   └── shared_file.h    # 共有のヘッダーファイル
+├── sharedC++Heder.h     # 共有のヘッダーファイル
 └── README.md            # この README ファイル
 ```
 
