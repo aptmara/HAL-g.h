@@ -26,9 +26,8 @@
 ## 開発環境
 
 - **C++ バージョン**: C++17 以上
-- **推奨 IDE**: Visual Studio Code、CLion、Xcode
+- **推奨 IDE**: Visual Studio
 - **Git**: GitHub を使用してバージョン管理を行います。
-- **コンパイラ**: g++ または clang++ を推奨します。
 
 ## コーディングルール
 
