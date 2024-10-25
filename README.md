@@ -222,7 +222,9 @@ int sum = add(5, 3); // sumは8になります。
 プロジェクトフォルダ/
 ├── main.cpp             # サンプルのメインファイル
 ├── sharedC++Heder.h     # 共有のヘッダーファイル
+├── operations.txt       # 操作説明テキスト
 └── README.md            # この README ファイル
+
 ```
 
 ## 変更方法
