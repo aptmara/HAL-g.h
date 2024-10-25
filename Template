@@ -1,0 +1,54 @@
+#ifndef PROJECTNAME_SHARED_FILE_H  // インクルードガード
+#define PROJECTNAME_SHARED_FILE_H
+
+#include <iostream>  // 必要な標準ライブラリは適宜追加
+
+/**
+ * @file shared_file.h
+ * @brief プロジェクト内で共通して使用するクラスや関数の宣言を含むヘッダーファイル。
+ * 
+ * このファイルには、プロジェクト内で広く利用する共通の関数やクラスが定義されます。
+ * 全員がこのファイルの構造や書き方に従うようにしましょう。
+ */
+
+// クラス定義
+class ExampleClass {
+public:
+    /**
+     * @brief コンストラクタ。
+     * @param value 初期値として設定する整数。
+     */
+    ExampleClass(int value);
+
+    /**
+     * @brief 値を取得するメソッド。
+     * @return 現在の値。
+     */
+    int getValue() const;
+
+    /**
+     * @brief 値を設定するメソッド。
+     * @param newValue 設定する新しい値。
+     */
+    void setValue(int newValue);
+
+private:
+    int _value;  // メンバ変数: クラスの状態を保持する
+};
+
+// 関数定義
+/**
+ * @brief 2つの整数を加算する関数。
+ * @param a 加算する最初の整数。
+ * @param b 加算する2番目の整数。
+ * @return aとbの合計。
+ */
+int add(int a, int b);
+
+/**
+ * @brief 標準出力にメッセージを表示するユーティリティ関数。
+ * @param message 表示する文字列。
+ */
+void printMessage(const std::string& message);
+
+#endif // PROJECTNAME_SHARED_FILE_H
