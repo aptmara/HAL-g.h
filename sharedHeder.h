@@ -3,7 +3,7 @@
  * ----------------------------------------------
  * ファイル名: SharedHeader.h
  * 作成日: 2024-10-25
- * 
+ *
  * 更新者: 山内陽
  * 更新日: 2024-11-06
  * 作業内容:
@@ -15,7 +15,16 @@
  * 作業内容:
  *  - 修正: 整形
  *  - 追加: conioexと統合
- * 
+ *
+ * 更新者: 山内陽
+ * 更新日: 2024-11-25
+ * 作業内容:
+ *  - 追加: isLeftMouseButtonClicked追加
+ *
+ * 更新者: 山内陽
+ * 更新日: 2024-12-11
+ * 作業内容:
+ *  - 修正: 多重インクルード時の動作不良解消。inlineで追加してってください
  * ----------------------------------------------
  */
 
@@ -32,12 +41,12 @@
 extern "C" {
 #endif
 #ifdef CONIOEX
-#define CONIOEX_INST extern 
+#define CONIOEX_INST extern
 #else /* !CONIOEX */
-#define CONIOEX_INST 
+#define CONIOEX_INST
 #endif /* CONIOEX */
 
-// 必要なヘッダーファイル
+	// 必要なヘッダーファイル
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
@@ -96,12 +105,19 @@ extern "C" {
 #endif /* CONIOEX */
 		;
 
+	// 構造体定義
+	typedef struct {
+		int x;
+		int y;
+	} ConsoleSize;
+
 #define BACKGROUND_COLOR_SHIFT 16   // 背景色指定時の4bitシフトのための値を定義する。背景色設定(textattr)に使用する。
-#define DEFAULT_TEXT_COLOR (WHITE + BACKGROUND_COLOR_SHIFT * BLACK)         // ゲーム標準文字色・背景色を定義する。文字色設定(textattr)に使用する。
+#define DEFAULT_TEXT_COLOR (WHITE + BACKGROUND_COLOR_SHIFT * BLACK)          // ゲーム標準文字色・背景色を定義する。文字色設定(textattr)に使用する。
+#define DEFAULT_BUTTON_COLOR (BLACK + BACKGROUND_COLOR_SHIFT * LIGHTGRAY)   // ボタンの通常時文字色・背景色を定義する。文字色設定(textattr)に使用する。
+#define HOVER_BUTTON_COLOR (WHITE + BACKGROUND_COLOR_SHIFT * LIGHTGRAY)     // ボタンのホバー時文字色・背景色を定義する。文字色設定(textattr)に使用する。
+#define TITLE_TEXT_COLOR (BLACK + BACKGROUND_COLOR_SHIFT * WHITE)           // タイトルの文字色・背景色を定義する。
+#define WARNING_COLOR (RED + BACKGROUND_COLOR_SHIFT * BLACK)
 #define DEFAULT_FONT_SIZE 28    // ゲーム標準文字サイズを定義する。フォントサイズ設定(fontsize)に使用する。
-
-
-
 
 
 	//ヘッダー内でconioexを使うためのプロトタイプ宣言。　SHARD内関数は書かなくていい。
@@ -140,7 +156,9 @@ extern "C" {
 	/*----------------------------------------------------------------------------------------------------------*/
 	/*----------------------------------------------------------------------------------------------------------*/
 
-	void InitialSetup() {
+
+	inline void InitialSetup() {
+		setcursortype(NOCURSOR);
 		fontsize(DEFAULT_FONT_SIZE); // 文字サイズをデフォルト値に設定する。
 		textattr(DEFAULT_TEXT_COLOR); // 文字色と背景色をデフォルト値に設定する。
 	}
@@ -151,7 +169,7 @@ extern "C" {
 	 * @param x 出力するx座標
 	 * @param endline 改行するかどうか
 	 */
-	void PrintAtPosition(const char* str, int x, bool endline) {
+	inline void PrintAtPosition(const char* str, int x, bool endline) {
 		gotoxy(x, wherey()); // 指定のx座標にカーソルを移動する。
 
 		printf("%s", str); // 文字列を表示する。
@@ -160,12 +178,11 @@ extern "C" {
 			printf("\n"); // 改行する。
 	}
 
-
 	/**
 	 * 現在のマウスのx座標を取得し、コンソール内の文字数に変換して返します。
 	 * @return int - コンソール内のマウスのX座標
 	 */
-	int GetMouseXPosition() {
+	inline int GetMouseXPosition() {
 		HWND consoleWindow = GetConsoleWindow();
 		POINT cursorPos;
 		GetCursorPos(&cursorPos);
@@ -188,7 +205,7 @@ extern "C" {
 	 * 現在のマウスの位置を取得し、コンソール内の文字数に変換して返します。
 	 * @return int - コンソール内のマウスのY座標
 	 */
-	int GetMouseYPosition() {
+	inline int GetMouseYPosition() {
 		HWND consoleWindow = GetConsoleWindow();
 		POINT cursorPos;
 		GetCursorPos(&cursorPos);
@@ -208,14 +225,13 @@ extern "C" {
 		return cursorPos.y / charHeight; // Y座標を文字数に変換
 	}
 
-
 	/**
 	 * 指定した座標に存在する文字を読み取り、返します。
 	 * @param  x 読み取るx座標
 	 * @param  y 読み取るy座標
 	 * @return 読み取った文字(char)
 	 */
-	char ReadCharAt(int x, int y) {
+	inline char ReadCharAt(int x, int y) {
 		HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE); // 標準出力ハンドルを取得する。
 		if (consoleHandle == INVALID_HANDLE_VALUE) {
 			return '\0'; // エラーの場合
@@ -252,11 +268,11 @@ extern "C" {
 	 * 詳細: 指定座標範囲の文字色と背景色を設定します。
 	 * @param startX 変える物の左上のx座標
 	 * @param startY 変える物の左上のy座標
-	 * @param endX 変えるも物の右下のx座標
-	 * @param endX 変えるも物の右下のx座標
+	 * @param endX 変える物の右下のx座標
+	 * @param endY 変える物の右下のy座標
 	 * @param color texrttrで使用する文字色・背景色(計算済み)
 	 */
-	void SetColor(int startX, int startY, int endX, int endY, int color) {
+	inline void SetColor(int startX, int startY, int endX, int endY, int color) {
 		int previousX = wherex(); // 現在のx座標を記録する。
 		int previousY = wherey(); // 現在のy座標を記録する。
 
@@ -278,9 +294,43 @@ extern "C" {
 		gotoxy(previousX, previousY); // 元のカーソル位置に戻る。
 	}
 
+	inline ConsoleSize GetConsoleSize() {
+		ConsoleSize size = { 0, 0 };
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		int ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+		if (ret) {
+			size.x = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+			size.y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		}
+		return size;
+	}
 
+	/**
+	 * すべての範囲の色を指定色に変更します
+	 * @param color 変更先の色
+	 */
+	inline void SetAllColor(int color) {
+		ConsoleSize console = GetConsoleSize();
 
+		CONSOLE_FONT_INFO fontInfo;
+		GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &fontInfo);
 
+		// 1文字分の幅を取得
+		COORD fontSize = fontInfo.dwFontSize;
+		int charWidth = fontSize.X;
+		int charHeight = fontSize.Y;
+
+		printf("%d,%d", console.x / charWidth, console.y / charHeight);
+		SetColor(0, 0, console.x / charWidth, console.y / charHeight, color);
+	}
+
+	/**
+	 * 詳細: 左クリックが押された場合trueを返します。
+	 * @return 押された場合true
+	 */
+	inline bool isLeftMouseButtonClicked() {
+		return (GetKeyState(VK_LBUTTON) & 0x8000) != 0;
+	}
 
 	/*----------------------------------------------------------------------------------------------------------*/
 	/*----------------------------------------------------------------------------------------------------------*/
@@ -289,6 +339,23 @@ extern "C" {
 	/*----------------------------------------------------------------------------------------------------------*/
 	/*----------------------------------------------------------------------------------------------------------*/
 	/*----------------------------------------------------------------------------------------------------------*/
+
+
+
+	/**
+	 * @file	conioex.h
+	 * @brief	Win32 コンソール I/O 拡張ヘッダ for Visual C++/Borland C++
+	 *
+	 * @author	HAL名古屋 教務部　浜谷浩彦
+	 * @date	2009/10/08 (木)
+	 * @date	2009/10/15 (木) msleep 関数を追加。
+	 * @date	2010/01/13 (水) playsound 関数で、常に先頭へシーク。
+	 * @date	2012/12/17 (月) reinport 関数を追加。(by 志水)
+	 * @date	2018/02/06 (火) inport 関数で、ゲームパッド対応強化。
+	 * @date	2018/06/07 (木) setcaption 関数の引数型にconstを追加。
+	 * @date	2021/03/08 (月) x64対応。width 関数、fontsize 関数、setpalette 関数、getpalette 関数追加。
+	 * @version	1.06
+	 */
 
 	 /**
 	  * @brief	水平方向のカーソル位置を取得
@@ -1291,5 +1358,5 @@ extern "C" {
 #endif
 
 
-#endif // !__CONIOEX_H 
+#endif // !__CONIOEX_H
 #endif // !___SHARED_FILE_H___
